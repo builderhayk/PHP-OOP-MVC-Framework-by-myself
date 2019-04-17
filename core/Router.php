@@ -6,8 +6,8 @@ class Router
     public static function route($url)
     {
         //controller
-        $controller = (isset($url[0]) && $url[0] != '') ? ucwords($url[0]) : DEFAULT_CONTROLLER;
-        $controller_name = $controller;
+        $controller = (isset($url[0]) && $url[0] != '') ? ucwords($url[0]).'Controller' : DEFAULT_CONTROLLER.'Controller';
+        $controller_name = str_replace('Controller','',$controller) ;
         array_shift($url);
 
         $action = (isset($url[0]) && $url[0] != '') ? $url[0] . 'Action' : 'indexAction';
@@ -18,7 +18,8 @@ class Router
         $grantAccess = self::hasAccess($controller_name, $action_name);
 
         if (!$grantAccess) {
-            $controller_name = $controller = ACCESS_RESTRICTED;
+            $controller = ACCESS_RESTRICTED.'Controller';
+            $controller_name = ACCESS_RESTRICTED;
             $action = 'indexAction';
         }
 
@@ -66,7 +67,7 @@ class Router
 
         if (Session::exists(CURRENT_USER_SESSION_NAME)) {
             $current_user_acls[] = "LoggedIn";
-            foreach (current_user()->acls() as $a) {
+            foreach (Users::currentUser()->acls() as $a) {
                 $current_user_acls[] = $a;
             }
         }
@@ -103,7 +104,6 @@ class Router
                 foreach ($val as $k => $v) {
                     if ($k == 'seperator' && !empty($sub)) {
                         $sub[$k] = '';
-                        continue;
                     } else if ($finalVal = self::get_link($v)) {
                         $sub[$k] = $finalVal;
                     }
@@ -126,13 +126,14 @@ class Router
         if (preg_match('/https?:\/\//', $val) == 1) {
             return $val;
         } else {
-            $uAry = explode(DS, $val);
+            $uAry = explode('/', $val);
             $controller_name = ucwords($uAry[0]);
             $action_name = (isset($uAry[1])) ? $uAry[1] : '';
             if (self::hasAccess($controller_name, $action_name)) {
-                return PROOT . $val;
+                return PROOT.$val;
             }
             return false;
+
         }
     }
 

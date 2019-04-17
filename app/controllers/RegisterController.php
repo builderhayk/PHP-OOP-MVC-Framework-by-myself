@@ -1,6 +1,6 @@
 <?php
 
-class Register extends Controller
+class RegisterController extends Controller
 {
     public function __construct($controller, $action)
     {
@@ -26,7 +26,7 @@ class Register extends Controller
                     'required' => true,
                     'min' => 6
                 ]
-            ]);
+            ],true);
             if ($validation->passed()) {
                 $user = $this->UsersModel->findByUsername($_POST['username']);
                 if ($user && password_verify(Input::get('password'), $user->password)) {
@@ -47,7 +47,7 @@ class Register extends Controller
         $validation = new Validate();
         $posted_values= ['fname'=>'','lname'=>'','username'=>'','email'=>'','password'=>'','confirm'=>''];
         if ($_POST) {
-            $posted_values = posted_values($_POST);
+            $posted_values = H::posted_values($_POST);
             //form validation
             $validation->check($_POST, [
                 'fname' => [
@@ -86,7 +86,7 @@ class Register extends Controller
                     'matches' => 'password'
                 ],
 
-            ]);
+            ],true);
             if ($validation->passed()) {
                 $newUser = new Users();
                 $newUser->registerNewUser($_POST);
@@ -101,8 +101,8 @@ class Register extends Controller
 
     public function logoutAction()
     {
-        if (current_user()) {
-            current_user()->logout();
+        if (Users::currentUser()) {
+            Users::currentUser()->logout();
         }
         Router::redirect('register/login');
     }

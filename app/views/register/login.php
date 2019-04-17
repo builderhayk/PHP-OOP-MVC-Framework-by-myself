@@ -5,6 +5,7 @@
 <div class="col-md-6 mx-auto mt-4">
     <h2 class="text-center text-primary" >Login Page</h2>
     <form action="<?=PROOT?>register/login" method="post">
+        <?=FH::csrfInput();?>
         <div class="bg-primary"><?=$this->displayErrors;?></div>
         <div class="form-group" style="position:relative;">
             <label for="username">Username</label>

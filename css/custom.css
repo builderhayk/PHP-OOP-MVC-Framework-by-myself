@@ -1,0 +1,15 @@
+
+.form-errors{
+    border-radius: 8px;
+    margin: 10px 25px 45px 25px;
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.6);
+}
+.form-errors li{
+    list-style: none;
+    font-size: 16px;
+}
+.form-errors.has-errors{
+    padding: 10px 15px;
+    border:1px solid #a94442;
+    border-radius: 8px;
+}

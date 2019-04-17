@@ -1,14 +1,9 @@
 {
   "Home": "home",
-  "Tools": {
-    "My Tools": "tools",
-    "Tool 1": "tools/first",
-    "Tool 2": "tools/second",
-    "seperator": "",
-    "Tool 3": "tools/third"
+  "Contacts": {
+    "My Contacts": "contacts",
+    "Add Contact": "contacts/add"
   },
-  "Google": "https://www.google.com",
-  "PHP Docs": "https://php.net/manual/len",
-  "Login": "https://register/login",
-  "Logout": "https://register/logout"
+  "Login": "register/login",
+  "Logout": "register/logout"
 }

@@ -5,7 +5,6 @@ define('ROOT', dirname(__FILE__));
 
 //load configuration and helpers
 require_once(ROOT . DS . 'config' . DS . 'config.php');
-require_once(ROOT . DS . 'app' . DS . 'lib' . DS . 'helpers' . DS . 'functions.php');
 
 //autoload classes
 function autoload($className)
@@ -24,7 +23,6 @@ spl_autoload_register('autoload');
 session_start();
 
 $url = isset($_SERVER['PATH_INFO']) ? explode('/', ltrim($_SERVER['PATH_INFO'], '/')) : [];
-
 
 if(!Session::exists(CURRENT_USER_SESSION_NAME) && COOKIE::exists(REMEMBER_ME_COOKIE_NAME)){
     Users::loginUserFromCookie();

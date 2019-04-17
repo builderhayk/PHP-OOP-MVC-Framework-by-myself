@@ -2,26 +2,15 @@
 
 class Model
 {
-    protected $_db, $_table, $_modelName, $_softDelete = false, $_columnNames = [];
+    protected $_db, $_table, $_modelName, $_softDelete = false;
     public $id;
 
     public function __construct($table)
     {
         $this->_db = DB::getInstance();
         $this->_table = $table;
-        $this->_setTableColumns();
         $this->_modelName = str_replace(' ', '', ucwords(str_replace('_', ' ', $this->_table)));
 
-    }
-
-    protected function _setTableColumns()
-    {
-        $columns = $this->get_columns();
-        foreach ($columns as $column) {
-            $columnName = $column->Field;
-            $this->_columnNames[] = $column->Field;
-            $this->{$columnName} = null;
-        }
     }
 
     public function get_columns()
@@ -29,26 +18,36 @@ class Model
         return $this->_db->get_columns($this->_table);
     }
 
+    protected function _softDeleteParams($params)
+    {
+        if ($this->_softDelete) {
+            if (array_key_exists('conditions', $params)) {
+                if (is_array($params['conditions'])) {
+                    $params['conditions'][] = "deleted=! 1";
+                } else {
+                    $params['conditions'] .= " AND deleted != 1";
+                }
+            } else {
+                $params['conditions'] = "deleted !=1";
+            }
+        }
+
+        return $params;
+    }
+
     public function find($params = [])
     {
-        $results = [];
-        $resultsQuery = $this->_db->find($this->_table, $params);
-        foreach ($resultsQuery as $result) {
-            $obj = new $this->_modelName($this->_table);
-            $obj - $this->populateObjData($result);
-            $results[] = $obj;
-        }
-        return $results;
+        $params = $this->_softDeleteParams($params);
+        $resultsQuery = $this->_db->find($this->_table, $params,get_class($this));
+        if (!$resultsQuery) return [];
+        return $resultsQuery;
     }
 
     public function findFirst($params = [])
     {
-        $resultQuery = $this->_db->findFirst($this->_table, $params);
-        $result = new $this->_modelName($this->_table);
-        if ($resultQuery) {
-            $result->populateObjData($resultQuery);
-        }
-        return $result;
+        $params = $this->_softDeleteParams($params);
+        $resultQuery = $this->_db->findFirst($this->_table, $params,get_class($this));
+        return $resultQuery;
     }
 
     public function findById($id)
@@ -58,10 +57,7 @@ class Model
 
     public function save()
     {
-        $fields = [];
-        foreach ($this->_columnNames as $column) {
-            $fields[$column] = $this->$column;
-        }
+        $fields = H::getObjectProperties($this);
         //determine whether to update or to insert
         if (property_exists($this, 'id') && $this->id != '') {
             return $this->update($this->id, $fields);
@@ -84,8 +80,8 @@ class Model
 
     public function delete($id = '')
     {
-        if ($id = '' && $this->$id == '') return false;
-        $id = ($id == '') ? $this->$id : $id;
+        if ($id == '' && $this->id == '') return false;
+        $id = ($id == '') ? $this->id : $id;
         if ($this->_softDelete) {
             return $this->update($id, ['deleted' => 1]);
         } else {
@@ -98,12 +94,12 @@ class Model
     {
         return $this->_db->query($sql, $bind);
     }
-
+//
     public function data()
     {
         $data = new stdClass();
-        foreach ($this->_columnNames as $column) {
-            $data->column = $this->column;
+        foreach (H::getObjectProperties($this) as $column=>$value) {
+            $data->column=$value;
         }
         return $data;
     }
@@ -112,8 +108,8 @@ class Model
     {
         if (!empty($params)) {
             foreach ($params as $key => $val) {
-                if (in_array($key, $this->_columnNames)) {
-                    $this->$key = sanitize($val);
+                if (property_exists($this,$key)){
+                    $this->$key = FH::sanitize($val);
                 }
             }
             return true;

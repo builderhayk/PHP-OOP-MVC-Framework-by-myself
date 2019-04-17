@@ -15,14 +15,21 @@ class Validate
         $this->_db = DB::getInstance();
     }
 
-    public function check($source, $items = [])
+    public function check($source, $items = [],$csrfCheck=false)
     {
+
         $this->_errors = [];
+        if ($csrfCheck){
+            $csrfPass=FH::checkToken($source['csrf_token']);
+            if (!isset($source['csrf_token'])|| !$csrfPass){
+                $this->addError(['F U','csrf_token']);
+            }
+        }
         foreach ($items as $item => $rules) {
-            $item = Input::sanitize($item);
+            $item = FH::sanitize($item);
             $display = $rules['display'];
             foreach ($rules as $rule => $rule_value) {
-                $value = Input::sanitize(trim($source[$item]));
+                $value = FH::sanitize(trim($source[$item]));
 
                 if ($rule === 'required' && empty($value)) {
                     $this->addError(["{$display} is required", $item]);
@@ -105,7 +112,8 @@ class Validate
 
     public function displayErrors()
     {
-        $html = '<ul class="bg-light">';
+        $hasErrors=(!empty($this->errors))?' has-errors':"";
+        $html = '<ul class="bg-light'. $hasErrors .'">';
         foreach ($this->_errors as $error) {
             if (is_array($error)) {
                 $html .= '<li class="text-danger">' . $error[0] . '</li>';

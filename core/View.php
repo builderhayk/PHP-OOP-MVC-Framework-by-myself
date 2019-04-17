@@ -2,7 +2,7 @@
 
 class View
 {
-    protected $_head, $_body, $_siteTitle=  SITE_TITLE, $_outputBuffer, $_layout = DEFAULT_LAYOUT;
+    protected $_head, $_body, $_siteTitle = SITE_TITLE, $_outputBuffer, $_layout = DEFAULT_LAYOUT;
 
     public function __construct()
     {
@@ -35,31 +35,43 @@ class View
 
     public function start($type)
     {
-        $this->_outputBuffer=$type;
+        $this->_outputBuffer = $type;
         ob_start();
     }
 
     public function end()
     {
-        if($this->_outputBuffer=='head'){
-            $this->_head=ob_get_clean();
-        }elseif($this->_outputBuffer=='body'){
-            $this->_body=ob_get_clean();
-        }else{
+        if ($this->_outputBuffer == 'head') {
+            $this->_head = ob_get_clean();
+        } elseif ($this->_outputBuffer == 'body') {
+            $this->_body = ob_get_clean();
+        } else {
             die("Fucking retard run first start method");
         }
     }
-    public function setSiteTitle(){
+
+    public function setSiteTitle()
+    {
         return $this->_siteTitle;
     }
+
     public function setTitle($title)
     {
-        $this->_siteTitle=$title;
+        $this->_siteTitle = $title;
     }
 
     public function setLayout($path)
     {
-        $this->_layout=$path;
+        $this->_layout = $path;
     }
 
+    public function insert($path)
+    {
+        include ROOT . DS . 'app' . DS . 'views' . DS . $path . '.php';
+    }
+
+    public function partial($group, $partial)
+    {
+        include ROOT . DS . 'app' . DS . 'views' . DS . $group . DS . 'partials' . DS . $partial . '.php';
+    }
 }
